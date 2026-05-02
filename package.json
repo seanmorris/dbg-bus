@@ -2,7 +2,7 @@
     "name": "dbg-bus",
     "displayName": "%displayName%",
     "description": "%description%",
-    "version": "0.0.1",
+    "version": "0.0.4",
     "publisher": "Sean Morris",
     "license": "Apache-2.0",
     "engines": {
@@ -17,11 +17,15 @@
         "hack.js"
     ],
     "activationEvents": [
+        "onStartupFinished",
+        "onLanguage:plaintext",
         "onDebug",
         "onCommand:dbgBus.startDebugging",
         "onCommand:dbgBus.stopDebugging",
         "onCommand:dbgBus.acceptAdapterMessage",
-        "onCommand:dbgBus.customRequest"
+        "onCommand:dbgBus.customRequest",
+        "onCommand:dbgBus.listBreakpoints",
+        "onCommand:dbgBus.addBreakpoint"
     ],
     "browser": "dist/index",
     "main": "dist/index",
@@ -46,6 +50,14 @@
             {
                 "command": "dbgBus.listSessions",
                 "title": "dbgBus.listSessions"
+            },
+            {
+                "command": "dbgBus.listBreakpoints",
+                "title": "dbgBus.listBreakpoints"
+            },
+            {
+                "command": "dbgBus.addBreakpoint",
+                "title": "dbgBus.addBreakpoint"
             }
         ],
         "debuggers": [
@@ -84,6 +96,33 @@
                             "name": {
                                 "type": "string",
                                 "description": "Configuration name."
+                            },
+                            "program": {
+                                "type": "string",
+                                "description": "Program path to execute in the host runtime."
+                            },
+                            "version": {
+                                "type": "string",
+                                "enum": [
+                                    "8.0",
+                                    "8.1",
+                                    "8.2",
+                                    "8.3",
+                                    "8.4",
+                                    "8.5"
+                                ],
+                                "description": "PHP runtime version to launch in the host debugger."
+                            },
+                            "stopOnEntry": {
+                                "type": "boolean",
+                                "description": "Pause immediately before the first line executes."
+                            },
+                            "initCommands": {
+                                "type": "array",
+                                "description": "phpdbg commands to run after launch setup and breakpoint installation.",
+                                "items": {
+                                    "type": "string"
+                                }
                             }
                         }
                     },
@@ -112,12 +151,66 @@
                             "name": {
                                 "type": "string",
                                 "description": "Configuration name."
+                            },
+                            "program": {
+                                "type": "string",
+                                "description": "Program path to execute in the host runtime."
+                            },
+                            "version": {
+                                "type": "string",
+                                "enum": [
+                                    "8.0",
+                                    "8.1",
+                                    "8.2",
+                                    "8.3",
+                                    "8.4",
+                                    "8.5"
+                                ],
+                                "description": "PHP runtime version to attach in the host debugger."
+                            },
+                            "stopOnEntry": {
+                                "type": "boolean",
+                                "description": "Pause immediately before the first line executes."
+                            },
+                            "initCommands": {
+                                "type": "array",
+                                "description": "phpdbg commands to run after debugger setup.",
+                                "items": {
+                                    "type": "string"
+                                }
                             }
                         }
                     }
                 }
             }
-        ]
+        ],
+        "breakpoints": [
+            {
+                "language": "php"
+            },
+            {
+                "language": "javascript"
+            },
+            {
+                "language": "typescript"
+            },
+            {
+                "language": "json"
+            }
+        ],
+        "configuration": {
+            "title": "Debug Bus",
+            "properties": {
+                "dbgBus.languageAssociations": {
+                    "type": "object",
+                    "default": {},
+                    "markdownDescription": "Map filename globs or extensions to VS Code language IDs for documents opened through the debug bus. Example: `{\"*.inc\": \"php\"}` or `{\".module\": \"php\"}`.",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
     },
     "devDependencies": {
         "@babel/cli": "^7.24.8",

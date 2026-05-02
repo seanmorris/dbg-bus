@@ -27,6 +27,26 @@ The browser hack also exposes a small control surface to the host page:
 - `listDebugSessions()`
 - `executeCommand(command, ...args)`
 
+## Language Associations
+
+`dbg-bus` can optionally remap opened filenames or glob patterns to a VS Code
+language id through the `dbgBus.languageAssociations` setting.
+
+Example:
+
+```json
+{
+  "dbgBus.languageAssociations": {
+    "*.inc": "php",
+    ".module": "php"
+  }
+}
+```
+
+This is useful when a debugger should treat nonstandard extensions as PHP, or
+when another host runtime wants breakpoint support and syntax highlighting for a
+language without hardcoding those rules into `dbg-bus` itself.
+
 ## Build
 
 ```bash
