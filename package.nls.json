@@ -1,0 +1,4 @@
+{
+    "displayName": "Debug Bus",
+    "description": "Bridges the VS Code debugger to a host-page runtime."
+}

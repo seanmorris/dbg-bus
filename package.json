@@ -1,0 +1,130 @@
+{
+    "name": "dbg-bus",
+    "displayName": "%displayName%",
+    "description": "%description%",
+    "version": "0.0.1",
+    "publisher": "Sean Morris",
+    "license": "Apache-2.0",
+    "engines": {
+        "vscode": "*"
+    },
+    "scripts": {
+        "build:index": "npx babel index.js --out-dir dist/",
+        "build:hack": "node build-hack.mjs",
+        "compile": "npm run build:index && npm run build:hack"
+    },
+    "hacks": [
+        "hack.js"
+    ],
+    "activationEvents": [
+        "onDebug",
+        "onCommand:dbgBus.startDebugging",
+        "onCommand:dbgBus.stopDebugging",
+        "onCommand:dbgBus.acceptAdapterMessage",
+        "onCommand:dbgBus.customRequest"
+    ],
+    "browser": "dist/index",
+    "main": "dist/index",
+    "contributes": {
+        "commands": [
+            {
+                "command": "dbgBus.startDebugging",
+                "title": "dbgBus.startDebugging"
+            },
+            {
+                "command": "dbgBus.stopDebugging",
+                "title": "dbgBus.stopDebugging"
+            },
+            {
+                "command": "dbgBus.acceptAdapterMessage",
+                "title": "dbgBus.acceptAdapterMessage"
+            },
+            {
+                "command": "dbgBus.customRequest",
+                "title": "dbgBus.customRequest"
+            },
+            {
+                "command": "dbgBus.listSessions",
+                "title": "dbgBus.listSessions"
+            }
+        ],
+        "debuggers": [
+            {
+                "type": "dbgBus",
+                "label": "Debug Bus",
+                "languages": [
+                    "php",
+                    "javascript",
+                    "typescript",
+                    "json"
+                ],
+                "configurationAttributes": {
+                    "launch": {
+                        "required": [
+                            "type",
+                            "request",
+                            "name"
+                        ],
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "enum": [
+                                    "dbgBus"
+                                ],
+                                "description": "Debugger type."
+                            },
+                            "request": {
+                                "type": "string",
+                                "enum": [
+                                    "launch",
+                                    "attach"
+                                ],
+                                "description": "Debugger request type."
+                            },
+                            "name": {
+                                "type": "string",
+                                "description": "Configuration name."
+                            }
+                        }
+                    },
+                    "attach": {
+                        "required": [
+                            "type",
+                            "request",
+                            "name"
+                        ],
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "enum": [
+                                    "dbgBus"
+                                ],
+                                "description": "Debugger type."
+                            },
+                            "request": {
+                                "type": "string",
+                                "enum": [
+                                    "launch",
+                                    "attach"
+                                ],
+                                "description": "Debugger request type."
+                            },
+                            "name": {
+                                "type": "string",
+                                "description": "Configuration name."
+                            }
+                        }
+                    }
+                }
+            }
+        ]
+    },
+    "devDependencies": {
+        "@babel/cli": "^7.24.8",
+        "esbuild": "^0.28.0"
+    },
+    "dependencies": {
+        "@babel/plugin-transform-modules-commonjs": "^7.25.7",
+        "quickbus": "^1.0.0"
+    }
+}
