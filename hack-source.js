@@ -29,6 +29,9 @@ const dbgBusHack = config => {
 		listBreakpoints: () => {
 			return window.vscodeEditor.commands.executeCommand('dbgBus.listBreakpoints');
 		},
+		listOpenBreakpoints: () => {
+			return window.vscodeEditor.commands.executeCommand('dbgBus.listOpenBreakpoints');
+		},
 		addBreakpoint: (uri, line, column = 1) => {
 			return window.vscodeEditor.commands.executeCommand('dbgBus.addBreakpoint', uri, line, column);
 		},

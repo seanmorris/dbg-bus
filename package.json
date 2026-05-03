@@ -25,6 +25,7 @@
         "onCommand:dbgBus.acceptAdapterMessage",
         "onCommand:dbgBus.customRequest",
         "onCommand:dbgBus.listBreakpoints",
+        "onCommand:dbgBus.listOpenBreakpoints",
         "onCommand:dbgBus.addBreakpoint"
     ],
     "browser": "dist/index",
@@ -54,6 +55,10 @@
             {
                 "command": "dbgBus.listBreakpoints",
                 "title": "dbgBus.listBreakpoints"
+            },
+            {
+                "command": "dbgBus.listOpenBreakpoints",
+                "title": "dbgBus.listOpenBreakpoints"
             },
             {
                 "command": "dbgBus.addBreakpoint",
@@ -104,12 +109,11 @@
                             "version": {
                                 "type": "string",
                                 "enum": [
-                                    "8.0",
-                                    "8.1",
-                                    "8.2",
-                                    "8.3",
+                                    "8.5",
                                     "8.4",
-                                    "8.5"
+                                    "8.3",
+                                    "8.2",
+                                    "8.1"
                                 ],
                                 "description": "PHP runtime version to launch in the host debugger."
                             },
@@ -159,12 +163,11 @@
                             "version": {
                                 "type": "string",
                                 "enum": [
-                                    "8.0",
-                                    "8.1",
-                                    "8.2",
-                                    "8.3",
+                                    "8.5",
                                     "8.4",
-                                    "8.5"
+                                    "8.3",
+                                    "8.2",
+                                    "8.1"
                                 ],
                                 "description": "PHP runtime version to attach in the host debugger."
                             },

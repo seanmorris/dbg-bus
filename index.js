@@ -30,6 +30,48 @@ const breakpointInfo = breakpoint => ({
 
 const listSessions = () => Array.from(sessions.values());
 
+const getOpenTabUris = () => {
+	const uris = new Set;
+
+	for(const group of vscode.window.tabGroups?.all ?? [])
+	{
+		for(const tab of group.tabs ?? [])
+		{
+			const input = tab.input;
+
+			if(typeof vscode.TabInputText !== 'undefined' && input instanceof vscode.TabInputText)
+			{
+				uris.add(input.uri.toString());
+				continue;
+			}
+
+			if(typeof vscode.TabInputTextDiff !== 'undefined' && input instanceof vscode.TabInputTextDiff)
+			{
+				uris.add(input.original.toString());
+				uris.add(input.modified.toString());
+			}
+		}
+	}
+
+	if(vscode.window.activeTextEditor?.document?.uri)
+	{
+		uris.add(vscode.window.activeTextEditor.document.uri.toString());
+	}
+
+	return uris;
+};
+
+const listOpenBreakpoints = () => {
+	const openTabUris = getOpenTabUris();
+
+	return vscode.debug.breakpoints
+		.filter(breakpoint => {
+			const uri = breakpoint.location?.uri?.toString();
+			return uri && openTabUris.has(uri);
+		})
+		.map(breakpointInfo);
+};
+
 const escapeRegex = string => String(string).replace(/[|\\{}()[\]^$+?.]/g, '\\$&');
 
 const globToRegExp = pattern => new RegExp(
@@ -254,6 +296,9 @@ export function activate(context)
 		}),
 		vscode.commands.registerCommand('dbgBus.listBreakpoints', () => {
 			return vscode.debug.breakpoints.map(breakpointInfo);
+		}),
+		vscode.commands.registerCommand('dbgBus.listOpenBreakpoints', () => {
+			return listOpenBreakpoints();
 		}),
 		vscode.commands.registerCommand('dbgBus.addBreakpoint', async (uri, line, column = 1) => {
 			const breakpoint = new vscode.SourceBreakpoint(
