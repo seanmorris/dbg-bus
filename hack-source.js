@@ -1,45 +1,127 @@
 import { Client, Server } from 'quickbus';
 
+let executeVSCodeCommandPromise;
+
+const getExecuteVSCodeCommand = () => {
+	if(executeVSCodeCommandPromise)
+	{
+		return executeVSCodeCommandPromise;
+	}
+
+	const getWindowCommandExecutor = async () => {
+		if(window.vscodeEditor?.commands?.executeCommand)
+		{
+			return window.vscodeEditor.commands.executeCommand.bind(window.vscodeEditor.commands);
+		}
+
+		const vscodeEditor = await window.vscodeEditorReady;
+
+		if(vscodeEditor?.commands?.executeCommand)
+		{
+			return vscodeEditor.commands.executeCommand.bind(vscodeEditor.commands);
+		}
+
+		throw new Error('The VS Code command bridge became ready without a commands API.');
+	};
+
+	executeVSCodeCommandPromise = new Promise((resolve, reject) => {
+		const finishWithFallback = error => {
+			getWindowCommandExecutor().then(resolve, fallbackError => reject(error || fallbackError));
+		};
+
+		if(typeof window.require !== 'function')
+		{
+			finishWithFallback();
+			return;
+		}
+
+		try
+		{
+			window.require(
+				['vs/workbench/browser/web.factory']
+				, module => {
+					const executeCommand = module?.commands?.executeCommand;
+
+					if(typeof executeCommand === 'function')
+					{
+						resolve(executeCommand);
+						return;
+					}
+
+					finishWithFallback();
+				}
+				, finishWithFallback
+			);
+		}
+		catch(error)
+		{
+			finishWithFallback(error);
+		}
+	});
+
+	return executeVSCodeCommandPromise;
+};
+
 const dbgBusHack = config => {
 	const searchParams = new URLSearchParams(location.search);
 	const callbackOrigin = searchParams.get('origin');
 
 	const client = Client.forWindow(window.parent ?? window.opener, callbackOrigin);
 	const server = new Server({
-		startDebugging: (configuration, options = {}) => {
-			return window.vscodeEditor.commands.executeCommand(
+		startDebugging: async (configuration, options = {}) => {
+			const executeCommand = await getExecuteVSCodeCommand();
+
+			return executeCommand(
 				'dbgBus.startDebugging',
 				options.workspaceFolderUri ?? null,
 				configuration,
 				options
 			);
 		},
-		stopDebugging: sessionId => {
-			return window.vscodeEditor.commands.executeCommand('dbgBus.stopDebugging', sessionId);
+		stopDebugging: async sessionId => {
+			const executeCommand = await getExecuteVSCodeCommand();
+
+			return executeCommand('dbgBus.stopDebugging', sessionId);
 		},
-		sendDebugAdapterMessage: (sessionId, message) => {
-			return window.vscodeEditor.commands.executeCommand('dbgBus.acceptAdapterMessage', sessionId, message);
+		sendDebugAdapterMessage: async (sessionId, message) => {
+			const executeCommand = await getExecuteVSCodeCommand();
+
+			return executeCommand('dbgBus.acceptAdapterMessage', sessionId, message);
 		},
-		customRequest: (sessionId, command, args) => {
-			return window.vscodeEditor.commands.executeCommand('dbgBus.customRequest', sessionId, command, args);
+		customRequest: async (sessionId, command, args) => {
+			const executeCommand = await getExecuteVSCodeCommand();
+
+			return executeCommand('dbgBus.customRequest', sessionId, command, args);
 		},
-		listDebugSessions: () => {
-			return window.vscodeEditor.commands.executeCommand('dbgBus.listSessions');
+		listDebugSessions: async () => {
+			const executeCommand = await getExecuteVSCodeCommand();
+
+			return executeCommand('dbgBus.listSessions');
 		},
-		listBreakpoints: () => {
-			return window.vscodeEditor.commands.executeCommand('dbgBus.listBreakpoints');
+		listBreakpoints: async () => {
+			const executeCommand = await getExecuteVSCodeCommand();
+
+			return executeCommand('dbgBus.listBreakpoints');
 		},
-		listOpenBreakpoints: () => {
-			return window.vscodeEditor.commands.executeCommand('dbgBus.listOpenBreakpoints');
+		listOpenBreakpoints: async () => {
+			const executeCommand = await getExecuteVSCodeCommand();
+
+			return executeCommand('dbgBus.listOpenBreakpoints');
 		},
-		addBreakpoint: (uri, line, column = 1) => {
-			return window.vscodeEditor.commands.executeCommand('dbgBus.addBreakpoint', uri, line, column);
+		addBreakpoint: async (uri, line, column = 1) => {
+			const executeCommand = await getExecuteVSCodeCommand();
+
+			return executeCommand('dbgBus.addBreakpoint', uri, line, column);
 		},
-		executeDebugCommand: (command, ...args) => {
-			return window.vscodeEditor.commands.executeCommand(command, ...args);
+		executeDebugCommand: async (command, ...args) => {
+			const executeCommand = await getExecuteVSCodeCommand();
+
+			return executeCommand(command, ...args);
 		},
-		executeCommand: (command, ...args) => {
-			return window.vscodeEditor.commands.executeCommand(command, ...args);
+		executeCommand: async (command, ...args) => {
+			const executeCommand = await getExecuteVSCodeCommand();
+
+			return executeCommand(command, ...args);
 		}
 	}, callbackOrigin);
 
